@@ -22,3 +22,20 @@ impl FnvHash for Fnv {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    static FNV: Fnv = Fnv {
+        prime: PRIME_32 as u32,
+        offset: OFFSET_32 as u32,
+    };
+
+    #[test]
+    fn test_fnv_hash() {
+        todo!("Find a correct test case to match against");
+        let data = "Hello World";
+        let hashed = FNV.hash(data);
+        assert_eq!(hashed, 123);
+    }
+}
