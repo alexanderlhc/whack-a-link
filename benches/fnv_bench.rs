@@ -14,8 +14,12 @@ fn bench_fnv(c: &mut Criterion) {
     for i in 1..=5 {
         let sentence: String = Sentence(1..i + 1).fake();
 
-        group.bench_function(BenchmarkId::new("fnv.hash", i), |b| {
-            b.iter(|| fnv.hash(&sentence))
+        group.bench_function(BenchmarkId::new("fnv.hash1", i), |b| {
+            b.iter(|| fnv.hash1(&sentence))
+        });
+
+        group.bench_function(BenchmarkId::new("fnv.hash1a", i), |b| {
+            b.iter(|| fnv.hash1a(&sentence))
         });
     }
 

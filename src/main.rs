@@ -7,6 +7,6 @@ fn main() {
     };
 
     let data = "hello";
-    let hash = fnv.hash(data);
+    let hash = fnv.hash1a(data);
     println!("Hash for {} is {}", data, hash);
 }

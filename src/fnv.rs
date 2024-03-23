@@ -2,7 +2,8 @@ pub const PRIME_32: u32 = 16777619;
 pub const OFFSET_32: u32 = 2166136261;
 
 pub trait FnvHash {
-    fn hash(&self, data: &str) -> u32;
+    fn hash1a(&self, data: &str) -> u32;
+    fn hash1(&self, data: &str) -> u32;
 }
 
 pub struct Fnv {
@@ -11,7 +12,16 @@ pub struct Fnv {
 }
 
 impl FnvHash for Fnv {
-    fn hash(&self, data: &str) -> u32 {
+    fn hash1(&self, data: &str) -> u32 {
+        let mut hash: u32 = self.offset;
+
+        for byte in data.bytes() {
+            hash = hash.wrapping_mul(self.prime);
+            hash ^= byte as u32;
+        }
+        hash as u32
+    }
+    fn hash1a(&self, data: &str) -> u32 {
         let mut hash: u32 = self.offset;
 
         for byte in data.bytes() {
@@ -33,9 +43,17 @@ mod tests {
 
     #[test]
     fn test_fnv_hash() {
-        todo!("Find a correct test case to match against");
         let data = "Hello World";
-        let hashed = FNV.hash(data);
-        assert_eq!(hashed, 123);
+        let hashed = FNV.hash1(data);
+        let hashed_hex = format!("{:x}", hashed);
+        assert_eq!(hashed_hex, "1282a4ef");
+    }
+
+    #[test]
+    fn test_fnv1a() {
+        let data = "Hello World";
+        let hashed = FNV.hash1a(data);
+        let hashed_hex = format!("{:x}", hashed);
+        assert_eq!(hashed_hex, "b3902527");
     }
 }
