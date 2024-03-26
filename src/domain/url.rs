@@ -15,6 +15,12 @@ impl AsRef<str> for Url {
     }
 }
 
+impl Url {
+    pub fn without_trailing_slash(&self) -> String {
+        self.0.trim_end_matches('/').to_string()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::Url;

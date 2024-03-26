@@ -15,7 +15,11 @@ impl ShortUrl {
 
 impl ShortUrl {
     pub fn to_url(&self) -> String {
-        format!("{}/{}", self.base_url.as_ref(), self.short.compress())
+        format!(
+            "{}/{}",
+            self.base_url.without_trailing_slash(),
+            self.short.compress()
+        )
     }
 }
 
@@ -28,6 +32,11 @@ mod tests {
         let base_url = Url::parse("https://www.rust-lang.org").unwrap();
         let short = ShortCode("hello".to_string());
         let short_url = ShortUrl::new(base_url, short);
+
+    #[test]
+    fn test_short_url_adds_slash() {
+        let base_url = Url::parse("https://www.rust-lang.org/").unwrap();
+        let short_url = ShortUrl::new(base_url, make_shortcode());
         assert_eq!(short_url.to_url(), "https://www.rust-lang.org/4f9f2cab");
     }
 }
