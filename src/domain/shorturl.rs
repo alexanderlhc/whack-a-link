@@ -27,11 +27,27 @@ impl ShortUrl {
 mod tests {
     use super::*;
     use crate::domain::url::Url;
+
+    fn make_shortcode() -> ShortCode {
+        ShortCode(String::from("hello"))
+    }
+
     #[test]
     fn test_short_url() {
         let base_url = Url::parse("https://www.rust-lang.org").unwrap();
-        let short = ShortCode("hello".to_string());
-        let short_url = ShortUrl::new(base_url, short);
+        let short_url = ShortUrl::new(base_url, make_shortcode());
+        assert_eq!(short_url.to_url(), "https://www.rust-lang.org/4f9f2cab");
+    }
+
+    #[test]
+    fn test_short_url_with_path() {
+        let base_url = Url::parse("https://www.rust-lang.org/path/to/something").unwrap();
+        let short_url = ShortUrl::new(base_url, make_shortcode());
+        assert_eq!(
+            short_url.to_url(),
+            "https://www.rust-lang.org/path/to/something/4f9f2cab"
+        );
+    }
 
     #[test]
     fn test_short_url_adds_slash() {
