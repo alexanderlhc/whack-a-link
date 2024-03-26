@@ -5,6 +5,7 @@ edition = "2021"
 
 
 [dependencies]
+external_url = { version = "2.5.0", package = "url" }
 
 [dev-dependencies]
 criterion = "0.5.1"
