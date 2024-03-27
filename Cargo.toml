@@ -5,7 +5,10 @@ edition = "2021"
 
 
 [dependencies]
+axum = "0.7.5"
 external_url = { version = "2.5.0", package = "url" }
+serde = { version = "1.0.197", features = ["derive"] }
+tokio = { version = "1.36.0", features = ["rt-multi-thread"] }
 
 [dev-dependencies]
 criterion = "0.5.1"
