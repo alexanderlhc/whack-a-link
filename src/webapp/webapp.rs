@@ -1,9 +1,7 @@
-use axum::routing::{get, post};
-use axum::serve::Serve;
-use axum::Router;
+use axum::{serve::Serve, Router};
 use tokio::net::TcpListener;
 
-use super::routes::shorten;
+use super::routes::create_router;
 
 pub struct Config {
     pub port: String,
@@ -41,10 +39,4 @@ async fn create_tcp_listener(port: &str) -> Result<TcpListener, String> {
 
 fn create_server(tcp_listener: TcpListener, router: Router) -> Serve<Router, Router> {
     axum::serve(tcp_listener, router)
-}
-
-fn create_router() -> Router {
-    Router::new()
-        .route("/", get(|| async { "Hello, world!" }))
-        .route("/api/shorten", post(shorten))
 }
