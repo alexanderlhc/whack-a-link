@@ -8,8 +8,6 @@ pub async fn shorten(Json(body): Json<CreateShortUrl>) -> (StatusCode, String) {
     let url = Url::parse("https://www.rust-lang.org");
     let short_url = ShortUrl::new(url.unwrap(), data);
 
-    println!("Shortened URL: {}", short_url.to_url());
-
     (StatusCode::CREATED, short_url.to_url())
 }
 
