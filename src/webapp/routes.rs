@@ -9,7 +9,7 @@ use crate::domain::{shortcode::ShortCode, shorturl::ShortUrl, url::Url};
 
 async fn shorten(Json(body): Json<CreateShortUrl>) -> (StatusCode, String) {
     let data = ShortCode(body.url);
-    let url = Url::parse("https://www.rust-lang.org");
+    let url = Url::parse("http://localhost:8080");
     let short_url = ShortUrl::new(url.unwrap(), data);
 
     (StatusCode::CREATED, short_url.to_url())
