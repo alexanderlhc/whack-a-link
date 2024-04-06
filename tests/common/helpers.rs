@@ -20,4 +20,13 @@ impl TestWebApp {
         let url = format!("{}{}", self.address, path);
         reqwest::get(url).await.unwrap()
     }
+    pub async fn post(&self, path: &str, body: serde_json::Value) -> Response {
+        let url = format!("{}{}", self.address, path);
+        reqwest::Client::new()
+            .post(url)
+            .json(&body)
+            .send()
+            .await
+            .unwrap()
+    }
 }
