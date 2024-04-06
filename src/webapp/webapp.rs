@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use axum::{serve::Serve, Router};
 use tokio::net::TcpListener;
 
@@ -24,9 +26,10 @@ impl WebApp {
 }
 
 async fn build(config: &Config) -> (Serve<Router, Router>, u16) {
-    let router = create_router();
     let tcp_listener = create_tcp_listener(&config.port).await.unwrap();
     let port = tcp_listener.local_addr().unwrap().port();
+    let app_state = create_app_state(&port.to_string());
+    let router = create_router(app_state);
     let server = create_server(tcp_listener, router);
     (server, port)
 }
@@ -37,6 +40,18 @@ async fn create_tcp_listener(port: &str) -> Result<TcpListener, String> {
         Ok(tcp_listener) => Ok(tcp_listener),
         Err(_) => Err("ERROR".to_string()),
     }
+}
+
+pub struct AppState {
+    pub base_url: String,
+    pub port: String,
+}
+
+fn create_app_state(port: &str) -> Arc<AppState> {
+    Arc::new(AppState {
+        base_url: "http://localhost".to_string(),
+        port: port.to_string(),
+    })
 }
 
 fn create_server(tcp_listener: TcpListener, router: Router) -> Serve<Router, Router> {
