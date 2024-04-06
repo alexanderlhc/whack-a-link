@@ -23,6 +23,13 @@ impl ShortUrl {
     }
 }
 
+impl ShortUrl {
+    pub fn from_shortcode(base_url: &str, shortcode: &str) -> Url {
+        todo!()
+        // Url::parse(&format!("{}/{}", base_url, shortcode)).unwrap()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

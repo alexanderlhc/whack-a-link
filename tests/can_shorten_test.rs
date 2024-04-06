@@ -20,10 +20,22 @@ async fn test_can_create_shortened_url() {
     assert_eq!(status, StatusCode::CREATED);
 
     let visit_shortened_url = reqwest::get(&shortened_url).await.unwrap();
-
     assert_eq!(
         visit_shortened_url.url().as_str(),
         "https://www.rust-lang.org/"
     );
-    assert_eq!(visit_shortened_url.status(), StatusCode::PERMANENT_REDIRECT);
+
+    let visit_no_redirect_policy = reqwest::Client::builder()
+        .redirect(reqwest::redirect::Policy::none())
+        .build()
+        .unwrap()
+        .get(&shortened_url)
+        .send()
+        .await
+        .unwrap();
+
+    assert_eq!(
+        visit_no_redirect_policy.status(),
+        StatusCode::PERMANENT_REDIRECT
+    );
 }
