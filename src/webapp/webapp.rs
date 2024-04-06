@@ -14,19 +14,21 @@ pub struct WebApp {
 
 impl WebApp {
     pub async fn create_app(config: Config) -> Result<WebApp, String> {
-        let app = build(&config).await;
+        let (server, port) = build(&config).await;
+
         Ok(WebApp {
-            server: app,
-            port: config.port,
+            server,
+            port: port.to_string(),
         })
     }
 }
 
-async fn build(config: &Config) -> Serve<Router, Router> {
+async fn build(config: &Config) -> (Serve<Router, Router>, u16) {
     let router = create_router();
     let tcp_listener = create_tcp_listener(&config.port).await.unwrap();
+    let port = tcp_listener.local_addr().unwrap().port();
     let server = create_server(tcp_listener, router);
-    server
+    (server, port)
 }
 
 async fn create_tcp_listener(port: &str) -> Result<TcpListener, String> {
