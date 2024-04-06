@@ -20,8 +20,12 @@ struct CreateShortUrl {
     url: String,
 }
 
+async fn health_check() -> &'static str {
+    "OK"
+}
+
 pub fn create_router() -> Router {
     Router::new()
-        .route("/", get(|| async { "Hello, world!" }))
-        .route("/api/shorten", post(shorten))
+        .route("/health", get(health_check))
+        .route("/shorten", post(shorten))
 }
