@@ -27,3 +27,21 @@ pub async fn get_url_by_shortcode(
         Err(_) => Ok(None),
     }
 }
+
+pub async fn insert_url(
+    shortcode: &str,
+    url: &str,
+    pool: &sqlx::PgPool,
+) -> Result<(), Box<dyn std::error::Error>> {
+    sqlx::query!(
+        r#"
+        INSERT INTO links (shortcode, url)
+        VALUES ($1, $2)
+        "#,
+        shortcode,
+        url
+    )
+    .execute(pool)
+    .await?;
+    Ok(())
+}
