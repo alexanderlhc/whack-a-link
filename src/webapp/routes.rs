@@ -3,13 +3,20 @@ use std::sync::Arc;
 use axum::{
     extract::{Path, State},
     http::StatusCode,
-    response::Redirect,
+    response::{IntoResponse, Redirect, Response},
     routing::{get, post},
     Json, Router,
 };
 use serde::Deserialize;
 
-use crate::domain::{shortcode::ShortCode, shorturl::ShortUrl, url::Url};
+use crate::{
+    domain::{
+        shortcode::{Hash, ShortCode},
+        shorturl::ShortUrl,
+        url::Url,
+    },
+    storage::storage_shortcode::{get_url_by_shortcode, insert_url},
+};
 
 use super::webapp::AppState;
 
@@ -17,9 +24,14 @@ async fn shorten(
     State(state): State<Arc<AppState>>,
     Json(body): Json<CreateShortUrl>,
 ) -> (StatusCode, String) {
-    let data = ShortCode(body.url);
-    let url = Url::parse(&format!("{}:{}", state.base_url, state.port));
-    let short_url = ShortUrl::new(url.unwrap(), data);
+    let destination = body.url.clone();
+    let data = ShortCode(destination.clone());
+    let url = Url::parse(&format!("{}:{}", state.base_url, state.port)).unwrap();
+    let short_url = ShortUrl::new(url.clone(), data);
+    let data = ShortCode(destination.clone());
+    insert_url(&data.compress(), &destination, &state.db)
+        .await
+        .unwrap();
 
     (StatusCode::CREATED, short_url.to_url())
 }
@@ -29,13 +41,23 @@ struct CreateShortUrl {
     url: String,
 }
 
+struct NotFoundError;
+impl IntoResponse for NotFoundError {
+    fn into_response(self) -> Response {
+        (StatusCode::NOT_FOUND, "Not Found").into_response()
+    }
+}
+
+// return redirct or not found
 async fn read_shortcode(
     Path(shortcode): Path<String>,
     State(state): State<Arc<AppState>>,
-) -> Redirect {
-    let short_url = ShortUrl::from_shortcode(&state.base_url, &shortcode);
-    let url = format!("{}:{}/health", &state.base_url, &state.port);
-    Redirect::permanent(&url)
+) -> Result<Redirect, NotFoundError> {
+    let url = get_url_by_shortcode(&shortcode, &state.db).await.unwrap();
+    match url {
+        Some(url) => Ok(Redirect::permanent(&url.url)),
+        None => Err(NotFoundError),
+    }
 }
 
 async fn health_check() -> &'static str {
