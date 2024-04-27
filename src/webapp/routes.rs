@@ -51,7 +51,6 @@ impl IntoResponse for NotFoundError {
     }
 }
 
-// return redirct or not found
 async fn read_shortcode(
     Path(shortcode): Path<String>,
     State(state): State<Arc<AppState>>,
