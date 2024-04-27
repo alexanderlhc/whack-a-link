@@ -20,6 +20,13 @@ pub async fn db_connect(
         credentials.database
     );
     let client = sqlx::PgPool::connect(&url).await?;
-    // let c = client.acquire().await?;
+
+    migrate_db(&client).await?;
+
     Ok(client)
+}
+
+async fn migrate_db(pool: &Pool<Postgres>) -> Result<(), Box<dyn std::error::Error>> {
+    sqlx::migrate!("./migrations").run(pool).await?;
+    Ok(())
 }
