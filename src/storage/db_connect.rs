@@ -1,4 +1,5 @@
 use sqlx::{Pool, Postgres};
+use tracing::info;
 
 pub struct DbCredentials {
     pub database: String,
@@ -21,6 +22,8 @@ pub async fn db_connect(
     );
     let client = sqlx::PgPool::connect(&url).await?;
 
+    info!("connected to database: {}", credentials.database);
+
     migrate_db(&client).await?;
 
     Ok(client)
@@ -28,5 +31,6 @@ pub async fn db_connect(
 
 async fn migrate_db(pool: &Pool<Postgres>) -> Result<(), Box<dyn std::error::Error>> {
     sqlx::migrate!("./migrations").run(pool).await?;
+    info!("db migrations ran successfully");
     Ok(())
 }

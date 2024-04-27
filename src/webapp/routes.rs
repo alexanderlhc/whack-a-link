@@ -8,6 +8,7 @@ use axum::{
     Json, Router,
 };
 use serde::Deserialize;
+use tracing::info;
 
 use crate::{
     domain::{
@@ -32,6 +33,8 @@ async fn shorten(
     insert_url(&data.compress(), &destination, &state.db)
         .await
         .unwrap();
+
+    info!("shortened {} to: {}", destination, short_url.to_url());
 
     (StatusCode::CREATED, short_url.to_url())
 }
