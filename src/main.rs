@@ -1,8 +1,5 @@
 use whack_a_link::{
-    storage::{
-        db_connect::{db_connect, DbCredentials},
-        storage_shortcode::get_url_by_shortcode,
-    },
+    storage::db_connect::DbCredentials,
     webapp::webapp::{Config, WebApp},
 };
 
@@ -17,26 +14,12 @@ async fn main() {
         port: "5432".to_string(),
     };
 
-    let pool = db_connect(&db_credentials).await.unwrap();
-    let url = get_url_by_shortcode("acdbc", &pool).await.unwrap();
-    if let Some(url) = url {
-        println!("URL: {}", url.url);
-        println!("Shortcode: {}", url.shortcode);
-    } else {
-        println!("URL not found");
-    }
-
-    // let pool = match db_connect(&db_credentials).await {
-    //     Ok(_) => println!("Connected to database"),
-    //     Err(e) => {
-    //         println!("Failed to connect to database: {}", e);
-    //         return;
-    //     }
-    // }
-
     // WebServer
     let port = "8000".to_string();
-    let config = Config { port };
+    let config = Config {
+        port,
+        db_credentials,
+    };
 
     println!("Starting server: http://0.0.0.0:{}", config.port);
 

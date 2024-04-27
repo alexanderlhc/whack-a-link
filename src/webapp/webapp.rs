@@ -1,12 +1,17 @@
 use std::sync::Arc;
 
 use axum::{serve::Serve, Router};
+use sqlx::{Pool, Postgres};
 use tokio::net::TcpListener;
+
+use crate::storage::db_connect;
+use crate::webapp::webapp::db_connect::db_connect;
 
 use super::routes::create_router;
 
 pub struct Config {
     pub port: String,
+    pub db_credentials: db_connect::DbCredentials,
 }
 
 pub struct WebApp {
@@ -28,7 +33,8 @@ impl WebApp {
 async fn build(config: &Config) -> (Serve<Router, Router>, u16) {
     let tcp_listener = create_tcp_listener(&config.port).await.unwrap();
     let port = tcp_listener.local_addr().unwrap().port();
-    let app_state = create_app_state(&port.to_string());
+    let pool = db_connect(&config.db_credentials).await.unwrap();
+    let app_state = create_app_state(&port.to_string(), pool);
     let router = create_router(app_state);
     let server = create_server(tcp_listener, router);
     (server, port)
@@ -45,12 +51,14 @@ async fn create_tcp_listener(port: &str) -> Result<TcpListener, String> {
 pub struct AppState {
     pub base_url: String,
     pub port: String,
+    pub db: Pool<Postgres>,
 }
 
-fn create_app_state(port: &str) -> Arc<AppState> {
+fn create_app_state(port: &str, pool: Pool<Postgres>) -> Arc<AppState> {
     Arc::new(AppState {
         base_url: "http://localhost".to_string(),
         port: port.to_string(),
+        db: pool,
     })
 }
 
