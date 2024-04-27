@@ -1,9 +1,25 @@
-use whack_a_link::webapp::webapp::{Config, WebApp};
+use whack_a_link::{
+    storage::db_connect::DbCredentials,
+    webapp::webapp::{Config, WebApp},
+};
 
 #[tokio::main]
 async fn main() {
-    let port = "8080".to_string();
-    let config = Config { port };
+    // Database
+    let db_credentials = DbCredentials {
+        database: "test".to_string(),
+        username: "db_user".to_string(),
+        password: "password".to_string(),
+        host: "localhost".to_string(),
+        port: "5432".to_string(),
+    };
+
+    // WebServer
+    let port = "8000".to_string();
+    let config = Config {
+        port,
+        db_credentials,
+    };
 
     println!("Starting server: http://0.0.0.0:{}", config.port);
 

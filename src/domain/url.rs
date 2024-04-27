@@ -15,6 +15,12 @@ impl AsRef<str> for Url {
     }
 }
 
+impl Clone for Url {
+    fn clone(&self) -> Self {
+        Url(self.0.clone())
+    }
+}
+
 impl Url {
     pub fn without_trailing_slash(&self) -> String {
         self.0.trim_end_matches('/').to_string()

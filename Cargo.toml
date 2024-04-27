@@ -8,14 +8,20 @@ edition = "2021"
 axum = "0.7.5"
 external_url = { version = "2.5.0", package = "url" }
 serde = { version = "1.0.197", features = ["derive"] }
+sqlx = { version = "0.7.4", features = ["postgres", "runtime-tokio", "migrate"] }
 tokio = { version = "1.36.0", features = ["rt-multi-thread"] }
 
 [dev-dependencies]
 criterion = "0.5.1"
 fake = "2.9.2"
+rand = "0.8.5"
 reqwest = { version = "0.12.3", features = ["json"] }
 serde_json = "1.0.115"
 
 [[bench]]
 name = "fnv_bench"
 harness = false
+
+# Faster incremental checking and builds
+[profile.dev.package.sqlx-macros]
+opt-level = 3
