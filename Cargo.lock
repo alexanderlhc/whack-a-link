@@ -2369,6 +2369,7 @@ dependencies = [
  "axum",
  "criterion",
  "fake",
+ "rand",
  "reqwest",
  "serde",
  "serde_json",
