@@ -3,11 +3,14 @@ use std::sync::Arc;
 use axum::{
     extract::{Path, State},
     http::StatusCode,
+    middleware,
+    response::{IntoResponse, Redirect, Response},
     response::Redirect,
     routing::{get, post},
     Json, Router,
 };
 use serde::Deserialize;
+use tracing::info;
 
 use crate::{
     domain::{
@@ -18,7 +21,7 @@ use crate::{
     storage::storage_shortcode::{get_url_by_shortcode, insert_url},
 };
 
-use super::{error::HttpError, webapp::AppState};
+use super::{middlewares::access_log, error::HttpError, webapp::AppState};
 
 async fn shorten(
     State(state): State<Arc<AppState>>,
@@ -33,7 +36,8 @@ async fn shorten(
     insert_url(&data.compress(), &destination, &state.db)
         .await
         .map_err(|_| HttpError::InternalServerError)?;
-
+  
+    info!("shortened {} to: {}", destination, short_url.to_url());
     Ok((StatusCode::CREATED, short_url.to_url()))
 }
 
@@ -62,5 +66,6 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
         .route("/health", get(health_check))
         .route("/shorten", post(shorten))
         .route("/:shortcode", get(read_shortcode))
+        .layer(middleware::from_fn(access_log))
         .with_state(app_state)
 }
