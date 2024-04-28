@@ -6,6 +6,7 @@ edition = "2021"
 
 [dependencies]
 axum = "0.7.5"
+config = { version = "0.14.0", features = ["toml"] }
 external_url = { version = "2.5.0", package = "url" }
 serde = { version = "1.0.197", features = ["derive"] }
 sqlx = { version = "0.7.4", features = ["postgres", "runtime-tokio", "migrate"] }

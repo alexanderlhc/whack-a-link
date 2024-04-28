@@ -1,6 +1,8 @@
+use serde::Deserialize;
 use sqlx::{Pool, Postgres};
 use tracing::info;
 
+#[derive(Debug, Deserialize)]
 pub struct DbCredentials {
     pub database: String,
     pub username: String,

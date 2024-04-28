@@ -1,20 +1,31 @@
-use crate::{storage::db_connect::DbCredentials, webapp::webapp::Config};
+use serde::Deserialize;
+use thiserror::Error;
 
-pub fn get_config() -> Config {
-    // Database
-    let db_credentials = DbCredentials {
-        database: "test".to_string(),
-        username: "db_user".to_string(),
-        password: "password".to_string(),
-        host: "localhost".to_string(),
-        port: "5432".to_string(),
-    };
+use crate::storage::db_connect::DbCredentials;
 
-    // WebServer
-    let port = "8000".to_string();
+pub fn get_config() -> Result<AppConfig, ConfigError> {
+    let c = config::Config::builder()
+        .add_source(config::File::with_name("config.toml"))
+        .build()
+        .map_err(|e| ConfigError::FileError(e.to_string()))
+        .unwrap();
 
-    Config {
-        port,
-        db_credentials,
+    match c.try_deserialize() {
+        Ok(config) => Ok(config),
+        Err(e) => Err(ConfigError::ParseError(e.to_string())),
     }
+}
+
+#[derive(Error, Debug)]
+pub enum ConfigError {
+    #[error("File error: {0}")]
+    FileError(String),
+    #[error("Parse error: {0}")]
+    ParseError(String),
+}
+
+#[derive(Debug, Deserialize)]
+pub struct AppConfig {
+    pub port: String,
+    pub db_credentials: DbCredentials,
 }

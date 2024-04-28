@@ -1,11 +1,10 @@
 use tracing::info;
-use whack_a_link::config::get_config;
-use whack_a_link::webapp::webapp::WebApp;
+use whack_a_link::{config::get_config, webapp::webapp::WebApp};
 
 #[tokio::main]
 async fn main() {
     init_logger();
-    let config = get_config();
+    let config = get_config().unwrap();
 
     info!("Starting server: http://0.0.0.0:{}", config.port);
 

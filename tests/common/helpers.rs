@@ -1,9 +1,6 @@
 use reqwest::Response;
 use sqlx::Error;
-use whack_a_link::{
-    storage::db_connect::DbCredentials,
-    webapp::webapp::{Config, WebApp},
-};
+use whack_a_link::{config::AppConfig, storage::db_connect::DbCredentials, webapp::webapp::WebApp};
 
 pub struct TestWebApp {
     pub address: String,
@@ -12,7 +9,7 @@ pub struct TestWebApp {
 pub async fn run_server() -> TestWebApp {
     let db_credentials = create_test_db().await.unwrap();
     let port = "0".to_string(); // 0 assigns random port
-    let config = Config {
+    let config = AppConfig {
         port,
         db_credentials,
     };
