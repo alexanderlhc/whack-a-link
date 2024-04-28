@@ -5,6 +5,7 @@ use axum::{
     http::StatusCode,
     middleware,
     response::{IntoResponse, Redirect, Response},
+    response::Redirect,
     routing::{get, post},
     Json, Router,
 };
@@ -20,24 +21,24 @@ use crate::{
     storage::storage_shortcode::{get_url_by_shortcode, insert_url},
 };
 
-use super::{middlewares::access_log, webapp::AppState};
+use super::{middlewares::access_log, error::HttpError, webapp::AppState};
 
 async fn shorten(
     State(state): State<Arc<AppState>>,
     Json(body): Json<CreateShortUrl>,
-) -> (StatusCode, String) {
+) -> Result<(StatusCode, String), HttpError> {
     let destination = body.url.clone();
     let data = ShortCode(destination.clone());
-    let url = Url::parse(&format!("{}:{}", state.base_url, state.port)).unwrap();
+    let url = Url::parse(&format!("{}:{}", state.base_url, state.port))
+        .map_err(|_| HttpError::InternalServerError)?;
     let short_url = ShortUrl::new(url.clone(), data);
     let data = ShortCode(destination.clone());
     insert_url(&data.compress(), &destination, &state.db)
         .await
-        .unwrap();
-
+        .map_err(|_| HttpError::InternalServerError)?;
+  
     info!("shortened {} to: {}", destination, short_url.to_url());
-
-    (StatusCode::CREATED, short_url.to_url())
+    Ok((StatusCode::CREATED, short_url.to_url()))
 }
 
 #[derive(Deserialize)]
@@ -45,21 +46,14 @@ struct CreateShortUrl {
     url: String,
 }
 
-struct NotFoundError;
-impl IntoResponse for NotFoundError {
-    fn into_response(self) -> Response {
-        (StatusCode::NOT_FOUND, "Not Found").into_response()
-    }
-}
-
 async fn read_shortcode(
     Path(shortcode): Path<String>,
     State(state): State<Arc<AppState>>,
-) -> Result<Redirect, NotFoundError> {
+) -> Result<Redirect, HttpError> {
     let url = get_url_by_shortcode(&shortcode, &state.db).await.unwrap();
     match url {
         Some(url) => Ok(Redirect::permanent(&url.url)),
-        None => Err(NotFoundError),
+        None => Err(HttpError::NotFound),
     }
 }
 
