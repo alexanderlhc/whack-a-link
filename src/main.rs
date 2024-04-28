@@ -1,28 +1,11 @@
 use tracing::info;
-use whack_a_link::{
-    storage::db_connect::DbCredentials,
-    webapp::webapp::{Config, WebApp},
-};
+use whack_a_link::config::get_config;
+use whack_a_link::webapp::webapp::WebApp;
 
 #[tokio::main]
 async fn main() {
     init_logger();
-
-    // Database
-    let db_credentials = DbCredentials {
-        database: "test".to_string(),
-        username: "db_user".to_string(),
-        password: "password".to_string(),
-        host: "localhost".to_string(),
-        port: "5432".to_string(),
-    };
-
-    // WebServer
-    let port = "8000".to_string();
-    let config = Config {
-        port,
-        db_credentials,
-    };
+    let config = get_config();
 
     info!("Starting server: http://0.0.0.0:{}", config.port);
 
